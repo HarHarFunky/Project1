@@ -8,39 +8,48 @@ from PyQt5.QtWidgets import *
 
 
 class Ui_pocketDNSresolver(object):
-    fDomain=""
-    fIP=""
-    def InputCheck(self, pocketDNSresolver, area=0):
+    formerDomain=""
+    formerIP=""
+    def InputCheck(self, pocketDNSresolver, area:int=0):
+        '''
+        Make sure the item being typed is/could become the proper area style
+        :param area: where is the typing occuring
+        '''
         self.inputError.setText("")
         if area: #IP
-            if self.ip4.isChecked(): 
-                if not re.match(r'(?:(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))\.){,3}(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))$',cIP:=self.ipBox.text()): self.ipBox.setText(self.fIP)
-                else: self.fIP = self.ipBox.text()
+            if self.ip4.isChecked():
+                if not re.match(r'(?:(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))\.){,3}(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))$',currentIP:=self.ipBox.text()): self.ipBox.setText(self.formerIP)
+                else: self.formerIP = self.ipBox.text()
             elif self.ip6.isChecked():
-                if not re.match(r'(?:[\da-f]{,4}\:){,7}[\da-f]{,4}$',cIP:=self.ipBox.text().lower()): self.ipBox.setText(self.fIP)
-                else: self.fIP=cIP
+                if not re.match(r'(?:[\da-f]{,4}\:){,7}[\da-f]{,4}$',currentIP:=self.ipBox.text().lower()): self.ipBox.setText(self.formerIP)
+                else: self.formerIP=currentIP
         else: #Domain
-            if not re.match(r'(?:[a-zA-Z\d\-]{1,63}\.)?[a-zA-Z\d\-]{,63}$',cDomain:=self.domainBox.text()): self.domainBox.setText(self.fDomain)
-            else: self.fDomain=cDomain
+            if not re.match(r'(?:[a-zA-Z\d\-]{1,63}\.)?[a-zA-Z\d\-]{,63}$',currentDomain:=self.domainBox.text()): self.domainBox.setText(self.formerDomain)
+            else: self.formerDomain=currentDomain
         
-    def add(self,ip,domain):
+    def add(self,ip: str,domain:str):
+        '''
+        Add the IP domain resolution to the list if the domain isn't already there
+        :param ip: the ip to add to the list
+        :param domain: the domain being added
+        '''
         if self.domainBox.text() == "": self.inputError.setText("Please put a domain down")
-        elif not re.match(r'[a-zA-Z\d\-]{1,63}\.[a-zA-Z\d\-]{2,63}$',cDomain:=self.domainBox.text()): self.inputError.setText("Improper Domain Format")
+        elif not re.match(r'[a-zA-Z\d\-]{1,63}\.[a-zA-Z\d\-]{2,63}$',currentDomain:=self.domainBox.text()): self.inputError.setText("Improper Domain Format")
         elif self.ipBox.text() == "": self.inputError.setText("Please add an IP to resolve to")
         else:
             if self.ip6.isChecked():
-                if not re.match(r'(?:[\da-f]{,4}\:){7}[\da-f]{,4}$',cIP:=self.ipBox.text().lower()): self.inputError.setText("Improper IPv6 Format")
+                if not re.match(r'(?:[\da-f]{,4}\:){7}[\da-f]{,4}$',currentIP:=self.ipBox.text().lower()): self.inputError.setText("Improper IPv6 Format")
                 else:
                     with open('files/output.csv','r') as cit:
                         for row in csv.reader(cit):
                             if row[1].casefold() ==  self.domainBox.text().casefold(): #Multiple domains can go to one IP, not vice-versa
                                 print(row[1])
-                                self.inputError.setText("Domain resolution already stored")
+                                self.inputError.setText("Domain already stored")
                                 break
                         else:
-                            with open('files/output.csv','a') as ciw: csv.writer(ciw).writerow(['6',cDomain,cIP])
+                            with open('files/output.csv','a') as ciw: csv.writer(ciw).writerow(['6',currentDomain,currentIP])
             elif self.ip4.isChecked():
-                if not re.match(r'(?:(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))\.){3}(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))$',cIP:=self.ipBox.text()): self.inputError.setText("Improper IPv4 Format")
+                if not re.match(r'(?:(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))\.){3}(?:(?:1?\d{,2})|(?:2[01234]?\d?)|(?:25[012345]?))$',currentIP:=self.ipBox.text()): self.inputError.setText("Improper IPv4 Format")
                 else:
                     with open('files/output.csv','r') as cit:
                         for row in csv.reader(cit):
@@ -48,7 +57,7 @@ class Ui_pocketDNSresolver(object):
                                 self.inputError.setText("Domain resolution already stored")
                                 break
                         else: 
-                            with open('files/output.csv','a') as ciw: csv.writer(ciw).writerow(['4',cDomain,cIP])
+                            with open('files/output.csv','a') as ciw: csv.writer(ciw).writerow(['4',currentDomain,currentIP])
             else: self.inputError.setText("Please select an IP version")
                     
                 
@@ -57,6 +66,12 @@ class Ui_pocketDNSresolver(object):
         
         
     def search(self,ip,domain):
+        '''
+        Resolve the domain to IP, or vice-versa
+        NOTE: one must be blank to search
+        :param ip: the ip to search
+        :param domain: the domain to search
+        '''
         self.inputError.setText("")
         try:
             with open('files/output.csv','r') as cit:
