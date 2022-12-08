@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import *
 class Ui_pocketDNSresolver(object):
     formerDomain=""
     formerIP=""
-    def InputCheck(self, pocketDNSresolver, area:int=0):
+    def InputCheck(self, pocketDNSresolver, area:int=0) -> None:
         '''
         Make sure the item being typed is/could become the proper area style
         :param area: where is the typing occuring
@@ -27,7 +27,7 @@ class Ui_pocketDNSresolver(object):
             if not re.match(r'(?:[a-zA-Z\d\-]{1,63}\.)?[a-zA-Z\d\-]{,63}$',currentDomain:=self.domainBox.text()): self.domainBox.setText(self.formerDomain)
             else: self.formerDomain=currentDomain
         
-    def add(self,ip: str,domain:str):
+    def add(self,ip: str,domain:str) -> None:
         '''
         Add the IP domain resolution to the list if the domain isn't already there
         :param ip: the ip to add to the list
@@ -65,7 +65,7 @@ class Ui_pocketDNSresolver(object):
         
         
         
-    def search(self,ip,domain):
+    def search(self,ip: str,domain: str) -> None:
         '''
         Resolve the domain to IP, or vice-versa
         NOTE: one must be blank to search
